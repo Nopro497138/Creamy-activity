@@ -5,35 +5,48 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Plants vs. Zombies</title>
   <style>
-    * { margin:0; padding:0; box-sizing:border-box; }
-    html, body { width:100%; height:100%; overflow:hidden; background:#000; }
-    #pvz-app { width:100%; height:100%; }
-    canvas { display:block; margin:0 auto; }
-    #loading-screen {
-      position:fixed; inset:0; background:#000;
-      display:flex; flex-direction:column;
-      align-items:center; justify-content:center;
-      color:#78c832; font-family:'Arial Black',sans-serif; z-index:999;
+    *{margin:0;padding:0;box-sizing:border-box;}
+    html,body{width:100%;height:100%;overflow:hidden;background:#000;}
+    #pvz-app{width:100%;height:100%;}
+    canvas{display:block;margin:0 auto;}
+    #loading-screen{
+      position:fixed;inset:0;background:linear-gradient(180deg,#001200,#002800);
+      display:flex;flex-direction:column;align-items:center;justify-content:center;
+      color:#78c832;font-family:'Arial Black',Impact,sans-serif;z-index:999;
     }
-    #loading-title { font-size:32px; text-shadow:0 0 20px #78c832; margin-bottom:24px; }
-    #loading-bar-bg { width:300px; height:18px; background:#1a3a00; border:2px solid #78c832; border-radius:9px; overflow:hidden; }
-    #loading-bar    { width:0%; height:100%; background:linear-gradient(90deg,#3a8a00,#78c832); transition:width 0.2s; }
-    #loading-text   { margin-top:12px; font-size:13px; color:#aaa; }
+    #loading-title{
+      font-size:38px;letter-spacing:2px;margin-bottom:8px;
+      text-shadow:0 0 24px #78c832,0 0 48px #226600;
+    }
+    #loading-subtitle{font-size:16px;color:#aaa;margin-bottom:32px;font-family:Arial,sans-serif;}
+    #loading-bar-bg{width:320px;height:20px;background:#0a1a00;border:2px solid #78c832;border-radius:10px;overflow:hidden;box-shadow:0 0 10px #226600;}
+    #loading-bar{width:0%;height:100%;background:linear-gradient(90deg,#3a8a00,#78c832,#a0ff50);transition:width 0.15s;border-radius:10px;}
+    #loading-text{margin-top:14px;font-size:13px;color:#888;font-family:Arial,sans-serif;}
   </style>
 </head>
 <body>
 <div id="loading-screen">
-  <div id="loading-title">PLANTS vs. ZOMBIES</div>
+  <div id="loading-title">PLANTS VS. ZOMBIES</div>
+  <div id="loading-subtitle">Discord Activity Edition</div>
   <div id="loading-bar-bg"><div id="loading-bar"></div></div>
-  <div id="loading-text">Loading...</div>
+  <div id="loading-text">Initialising...</div>
 </div>
 <div id="pvz-app"></div>
 
-<!-- Phaser 3 from CDN -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.60.0/phaser.min.js"></script>
-<!-- Discord Embedded App SDK via CDN -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/discord-embedded-app-sdk/1.0.0/discordSdk.min.js" onerror="console.warn('Discord SDK CDN failed, using stub')"></script>
-<!-- Our game -->
+<script>
+// Detect if we're running through Vite (dev) or served directly
+// In production (dist/), Phaser is bundled. In dev mode, load from CDN.
+window.__PVZ_DEV__ = !document.querySelector('script[src*="assets/"]');
+</script>
+
+<!-- Phaser 3 from CDN (used in both dev and prod as external) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.60.0/phaser.min.js"
+        crossorigin="anonymous"
+        referrerpolicy="no-referrer"
+        onerror="document.getElementById('loading-text').textContent='Error: Could not load Phaser. Check internet connection.'">
+</script>
+
+<!-- Main game entry — uses ES modules -->
 <script type="module" src="/src/main.js"></script>
 </body>
 </html>
