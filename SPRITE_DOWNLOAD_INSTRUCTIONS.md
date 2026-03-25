@@ -1,66 +1,73 @@
-# PvZ Sprite Download Instructions
+# Sprite & Asset Download Instructions
+# ===========================================
+# Put ALL files in: pvz-activity/client/assets/
+# GitHub-hosted assets work — just commit them to the repo.
+# The game auto-generates colored fallbacks for any missing sprite.
 
-All sprites come from: https://www.spriters-resource.com/pc_computer/plantsvszombies/
+## BACKGROUNDS (JPG, ~900x600 recommended)
+# Download from: https://www.spriters-resource.com/pc_computer/plantsvszombies/sheet/30362/
+  bg_day.jpg    — Day background     [already provided]
+  bg_night.jpg  — Night background
+  bg_pool.jpg   — Pool background
+  bg_fog.jpg    — Fog background
+  bg_roof.jpg   — Roof background
 
-## BACKGROUNDS (save as shown, 900x600px recommended)
-- bg_night.jpg  → from "Backgrounds → Night"
-- bg_pool.jpg   → from "Backgrounds → Pool"  
-- bg_fog.jpg    → from "Backgrounds → Fog"
-- bg_roof.jpg   → from "Backgrounds → Roof"
+## PLANTS (PNG with transparency, single sprite ~70-100px)
+# https://www.spriters-resource.com/pc_computer/plantsvszombies/
+  plant_peashooter.png    [already provided]
+  plant_sunflower.png     [already provided]
+  plant_wallnut.png       [already provided]
+  plant_cherrybomb.png
+  plant_snowpea.png
+  plant_chomper.png
+  plant_repeater.png
+  plant_potatomine.png
+  plant_iceshroom.png
+  plant_squash.png
+  plant_tallnut.png
+  plant_threepeater.png
+  plant_puffshroom.png
 
-## PLANTS (individual PNG exports, approx 70x70px)
-- plant_cherrybomb.png  → "Plants → Cherry Bomb"
-- plant_snowpea.png     → "Plants → Snow Pea"
-- plant_chomper.png     → "Plants → Chomper"
-- plant_repeater.png    → "Plants → Peashooter and Repeater"
-- plant_potatomine.png  → "Plants → Potato Mine"
-- plant_iceshroom.png   → "Plants → Ice-shroom"
-- plant_squash.png      → "Plants → Squash"
-- plant_tallnut.png     → "Plants → Tall-nut"
-- plant_threepeater.png → "Plants → Threepeater"
-- plant_puffshroom.png  → "Plants → Puff-shroom"
+## ZOMBIES (PNG with transparency, ~60-120px tall)
+  zombie_regular.png      [already provided]
+  zombie_cone.png         [already provided]
+  zombie_bucket.png
+  zombie_flag.png
+  zombie_newspaper.png
+  zombie_football.png
+  zombie_polevault.png
+  zombie_gargantuar.png
+  zombie_imp.png
 
-## ZOMBIES (PNG, approx 60x100px)
-- zombie_bucket.png     → "Zombies → Regular Zombies" (bucket variant frame)
-- zombie_flag.png       → "Zombies → Regular Zombies" (flag frame)
-- zombie_newspaper.png  → "Zombies → Newspaper Zombie"
-- zombie_football.png   → "Zombies → Football Zombie"
-- zombie_polevault.png  → "Zombies → Pole Vaulting Zombie"
-- zombie_gargantuar.png → "Zombies → Gargantuar"
-- zombie_imp.png        → "Zombies → Imp"
+## PROJECTILES (PNG, ~16-20px)
+  projectile_pea.png       — green pea ball
+  projectile_snowpea.png   — blue-white frozen pea
+  projectile_fire.png      — orange fireball
 
-## UI ELEMENTS
-- ui_sun.png            → Any sun coin graphic from the game UI
-- ui_seed_packet.png    → Seed packet background (brown card)
-- lawnmower.png         → Lawnmower sprite
-- house.png             → House sprite (left side of lawn)
+## UI
+  lawnmower.png            — lawnmower sprite
+  gravestone.png           — gravestone for level select
+  ui_sun.png               — sun coin icon
 
-## PROJECTILES (small PNGs, ~16x16px)
-- projectile_pea.png    → Green pea ball
-- projectile_snowpea.png→ Blue-white frozen pea
-- projectile_fire.png   → Orange fireball
+## AUDIO (.ogg preferred, .mp3 also works)
+# Official OST: https://pvz.fandom.com/wiki/Plants_vs._Zombies_Original_Soundtrack
+  music_grasswalk.ogg      — main day theme (used as menu + day levels)
+  music_lvlselect.ogg      — level select screen music
+  music_moongrains.ogg     — night level theme
+  music_watery_graves.ogg  — pool level theme
+  music_cerebrawl.ogg      — fog/roof theme
+  sfx_groan.ogg            — zombie entrance groan
+  sfx_splat.ogg            — pea hitting zombie
+  sfx_plant.ogg            — plant placement sound
+  sfx_coin.ogg             — sun collected
+  sfx_lawnmower.ogg        — lawnmower activating
+  sfx_boom.ogg             — explosion
+  sfx_freeze.ogg           — freeze effect
+  sfx_complete.ogg         — level complete fanfare
+  sfx_flag.ogg             — flag wave (final wave warning)
 
-## AUDIO (.ogg or .mp3)
-Music from: https://pvz.fandom.com/wiki/Plants_vs._Zombies_Original_Soundtrack
-- music_grasswalk.ogg   → "Grasswalk" (Day theme)
-- music_moongrains.ogg  → "Moongrains" (Night theme)
-- music_watery_graves.ogg → "Watery Graves" (Pool theme)
-- music_cerebrawl.ogg   → "Cerebrawl" (Fog/Roof theme)
+## FONT (already provided)
+  Poppins-Black.ttf        [already provided]
 
-Sound effects (extract from PvZ install folder — Resources/sounds/):
-- sfx_groan.ogg       → zombie_moan.ogg
-- sfx_splat.ogg       → pea_hit.ogg
-- sfx_plant.ogg       → plant.ogg
-- sfx_coin.ogg        → sun_collected.ogg
-- sfx_lawnmower.ogg   → lawnmower.ogg
-- sfx_boom.ogg        → explosion.ogg
-- sfx_freeze.ogg      → freeze.ogg
-- sfx_complete.ogg    → level_complete.ogg
-
-## Already provided (from user upload):
-- bg_day.jpg           ✅
-- zombie_regular.png   ✅
-- zombie_cone.png      ✅
-- plant_wallnut.png    ✅
-- plant_peashooter.png ✅
-- plant_sunflower.png  ✅
+## LOGO (already provided)
+  logo.png                 [already provided]
