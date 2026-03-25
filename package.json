@@ -1,7 +1,7 @@
 {
   "name": "pvz-discord-activity",
   "version": "1.0.0",
-  "description": "Plants vs Zombies Discord Activity",
+  "description": "Plants Mayhem — Discord Activity",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
