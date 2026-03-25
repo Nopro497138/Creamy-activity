@@ -1,196 +1,172 @@
-// PreloadScene.js — loads all assets before game starts
+// PreloadScene.js — loads all assets, shows logo loading screen
 export default class PreloadScene extends Phaser.Scene {
   constructor() { super("PreloadScene"); }
 
   preload() {
-    const bar  = document.getElementById("loading-bar");
-    const text = document.getElementById("loading-text");
-    const screen = document.getElementById("loading-screen");
-    screen.style.display = "flex";
+    const W = this.scale.width, H = this.scale.height;
 
-    this.load.on("progress", (v) => {
-      if (bar)  bar.style.width  = Math.round(v * 100) + "%";
-      if (text) text.textContent = `Loading... ${Math.round(v * 100)}%`;
-    });
-    this.load.on("complete", () => {
-      if (screen) screen.style.display = "none";
-    });
+    // ── Loading screen canvas ─────────────────────────────────────
+    this.cameras.main.setBackgroundColor("#000000");
 
-    const BASE = "/assets/";
+    // Logo centered
+    this.logoImg = this.add.image(W/2, H/2 - 60, "__DEFAULT").setAlpha(0);
+    this.logoLoaded = false;
 
-    // ── Backgrounds ─────────────────────────────────────────────
-    // Download from: https://www.spriters-resource.com/pc_computer/plantsvszombies/
-    // Day, Night, Pool, Fog, Roof backgrounds
-    this.load.image("bg_day",   BASE + "bg_day.jpg");
-    this.load.image("bg_night", BASE + "bg_night.jpg");   // place in /assets/
-    this.load.image("bg_pool",  BASE + "bg_pool.jpg");
-    this.load.image("bg_fog",   BASE + "bg_fog.jpg");
-    this.load.image("bg_roof",  BASE + "bg_roof.jpg");
+    // Progress bar elements
+    const barW = 360, barH = 18;
+    const barX = W/2 - barW/2, barY = H/2 + 100;
 
-    // Fallback to day if others missing
-    ["bg_night","bg_pool","bg_fog","bg_roof"].forEach(k => {
-      if (!this.textures.exists(k)) this.load.image(k, BASE + "bg_day.jpg");
-    });
+    this.add.rectangle(W/2, barY + barH/2, barW + 6, barH + 6, 0x226600).setOrigin(0.5);
+    this.barBg = this.add.rectangle(barX, barY, barW, barH, 0x0a1a00).setOrigin(0);
+    this.bar   = this.add.rectangle(barX, barY, 0, barH, 0x78c832).setOrigin(0);
+    this.loadTxt = this.add.text(W/2, barY + 36, "Loading...", {
+      fontFamily: "Arial", fontSize: "15px", color: "#888888",
+    }).setOrigin(0.5);
 
-    // ── UI Elements ──────────────────────────────────────────────
-    this.load.image("sun_icon",     BASE + "ui_sun.png");       // yellow sun coin
-    this.load.image("seed_packet",  BASE + "ui_seed_packet.png"); // seed packet bg
-    this.load.image("lawn_mower",   BASE + "lawnmower.png");
-    this.load.image("house",        BASE + "house.png");
+    // ── Load logo first so we can show it ────────────────────────
+    this.load.image("logo",          "/assets/logo.png");
+    this.load.image("lvlselect_bg",  "/assets/lvlselect_bg.png");
+    this.load.image("bg_day",        "/assets/bg_day.jpg");
 
-    // ── Plants (single images — user provided) ────────────────────
-    this.load.image("plant_peashooter",  BASE + "plant_peashooter.png");
-    this.load.image("plant_sunflower",   BASE + "plant_sunflower.png");
-    this.load.image("plant_wallnut",     BASE + "plant_wallnut.png");
+    // ── Font ─────────────────────────────────────────────────────
+    this.load.font = this.load.font || (() => {});
+    // Load via CSS @font-face
+    if (!document.querySelector('#pvz-font-style')) {
+      const style = document.createElement('style');
+      style.id    = 'pvz-font-style';
+      style.textContent = `@font-face {
+        font-family: 'PoppinsBlack';
+        src: url('/assets/Poppins-Black.ttf') format('truetype');
+      }`;
+      document.head.appendChild(style);
+    }
 
-    // ── Plant spritesheets ────────────────────────────────────────
-    // Download from: https://www.spriters-resource.com/pc_computer/plantsvszombies/
-    // Each sheet: frameWidth=70, frameHeight=70 typically (vary per plant)
-    // Using single images as fallback, replace with spritesheets for animation
-    const plantSheets = [
-      ["plant_cherrybomb",  71,  71, 7],
-      ["plant_snowpea",     70,  70, 7],
-      ["plant_chomper",     70,  70, 10],
-      ["plant_repeater",    70,  70, 7],
-      ["plant_potatomine",  70,  70, 9],
-      ["plant_iceshroom",   70,  70, 7],
-      ["plant_squash",      70,  70, 6],
-      ["plant_tallnut",     70,  70, 3],
-      ["plant_threepeater", 70,  70, 7],
-      ["plant_puffshroom",  70,  70, 6],
+    // ── Backgrounds ───────────────────────────────────────────────
+    this.load.image("bg_night",   "/assets/bg_night.jpg");
+    this.load.image("bg_pool",    "/assets/bg_pool.jpg");
+    this.load.image("bg_fog",     "/assets/bg_fog.jpg");
+    this.load.image("bg_roof",    "/assets/bg_roof.jpg");
+
+    // ── Plants — single images OR spritesheets ────────────────────
+    // Drop any 70×70 spritesheet as plant_<name>_sheet.png in /assets/
+    // Otherwise falls back to plant_<name>.png (single idle frame)
+    const plantKeys = [
+      "peashooter","sunflower","wallnut","cherrybomb","snowpea",
+      "chomper","repeater","potatomine","iceshroom","squash",
+      "tallnut","threepeater","puffshroom",
     ];
-    plantSheets.forEach(([key, fw, fh]) => {
-      // Load single image as fallback — replace path with real spritesheet
-      this.load.image(key, BASE + key + ".png");
+    plantKeys.forEach(k => {
+      this.load.image(`plant_${k}`,  `/assets/plant_${k}.png`);
     });
 
-    // ── Zombie spritesheets ───────────────────────────────────────
-    // Download from: https://www.spriters-resource.com/pc_computer/plantsvszombies/
-    // Regular Zombies sheet has walk (8 frames), attack (4), die (5) animations
-    this.load.image("zombie_regular",    BASE + "zombie_regular.png");
-    this.load.image("zombie_cone",       BASE + "zombie_cone.png");
-    this.load.image("zombie_bucket",     BASE + "zombie_bucket.png");   // add to /assets
-    this.load.image("zombie_flag",       BASE + "zombie_flag.png");
-    this.load.image("zombie_newspaper",  BASE + "zombie_newspaper.png");
-    this.load.image("zombie_football",   BASE + "zombie_football.png");
-    this.load.image("zombie_polevault",  BASE + "zombie_polevault.png");
-    this.load.image("zombie_gargantuar", BASE + "zombie_gargantuar.png");
-    this.load.image("zombie_imp",        BASE + "zombie_imp.png");
+    // ── Zombies ───────────────────────────────────────────────────
+    const zombieKeys = [
+      "regular","cone","bucket","flag","newspaper",
+      "football","polevault","gargantuar","imp",
+    ];
+    zombieKeys.forEach(k => {
+      this.load.image(`zombie_${k}`, `/assets/zombie_${k}.png`);
+    });
 
     // ── Projectiles ───────────────────────────────────────────────
-    this.load.image("proj_pea",     BASE + "projectile_pea.png");
-    this.load.image("proj_snowpea", BASE + "projectile_snowpea.png");
-    this.load.image("proj_fire",    BASE + "projectile_fire.png");
+    this.load.image("proj_pea",      "/assets/projectile_pea.png");
+    this.load.image("proj_snowpea",  "/assets/projectile_snowpea.png");
+    this.load.image("proj_fire",     "/assets/projectile_fire.png");
 
-    // ── Effects ───────────────────────────────────────────────────
-    this.load.image("fx_explode",   BASE + "fx_explosion.png");
-    this.load.image("fx_freeze",    BASE + "fx_freeze.png");
-    this.load.image("fx_sun",       BASE + "fx_sun.png");
+    // ── UI ────────────────────────────────────────────────────────
+    this.load.image("ui_sun",        "/assets/ui_sun.png");
+    this.load.image("ui_seed_bg",    "/assets/ui_seed_bg.png");
+    this.load.image("lawnmower",     "/assets/lawnmower.png");
+    this.load.image("gravestone",    "/assets/gravestone.png");
 
-    // ── Music ─────────────────────────────────────────────────────
-    // Download official PvZ OST tracks (ogg format works best)
-    // From: https://pvz.fandom.com/wiki/Plants_vs._Zombies_Original_Soundtrack
-    this.load.audio("music_menu",        BASE + "music_grasswalk.ogg");
-    this.load.audio("music_grasswalk",   BASE + "music_grasswalk.ogg");  // Day levels
-    this.load.audio("music_moongrains",  BASE + "music_moongrains.ogg"); // Night levels
-    this.load.audio("music_watery_graves",BASE+"music_watery_graves.ogg"); // Pool
-    this.load.audio("music_cerebrawl",   BASE + "music_cerebrawl.ogg");  // Fog/Roof
-    this.load.audio("sfx_zombie_groan",  BASE + "sfx_groan.ogg");
-    this.load.audio("sfx_pea_hit",       BASE + "sfx_splat.ogg");
-    this.load.audio("sfx_plant",         BASE + "sfx_plant.ogg");
-    this.load.audio("sfx_sun_collect",   BASE + "sfx_coin.ogg");
-    this.load.audio("sfx_lawnmower",     BASE + "sfx_lawnmower.ogg");
-    this.load.audio("sfx_explosion",     BASE + "sfx_boom.ogg");
-    this.load.audio("sfx_freeze",        BASE + "sfx_freeze.ogg");
-    this.load.audio("sfx_level_complete",BASE + "sfx_complete.ogg");
+    // ── Audio ─────────────────────────────────────────────────────
+    this.load.audio("music_menu",         "/assets/music_grasswalk.ogg");
+    this.load.audio("music_lvlselect",    "/assets/music_lvlselect.ogg");
+    this.load.audio("music_grasswalk",    "/assets/music_grasswalk.ogg");
+    this.load.audio("music_moongrains",   "/assets/music_moongrains.ogg");
+    this.load.audio("music_watery",       "/assets/music_watery_graves.ogg");
+    this.load.audio("music_fog",          "/assets/music_cerebrawl.ogg");
+    this.load.audio("music_cerebrawl",    "/assets/music_cerebrawl.ogg");
+    this.load.audio("sfx_zombie_groan",   "/assets/sfx_groan.ogg");
+    this.load.audio("sfx_pea_hit",        "/assets/sfx_splat.ogg");
+    this.load.audio("sfx_plant",          "/assets/sfx_plant.ogg");
+    this.load.audio("sfx_sun_collect",    "/assets/sfx_coin.ogg");
+    this.load.audio("sfx_lawnmower",      "/assets/sfx_lawnmower.ogg");
+    this.load.audio("sfx_explosion",      "/assets/sfx_boom.ogg");
+    this.load.audio("sfx_freeze",         "/assets/sfx_freeze.ogg");
+    this.load.audio("sfx_level_complete", "/assets/sfx_complete.ogg");
+    this.load.audio("sfx_wave_flag",      "/assets/sfx_flag.ogg");
+
+    // ── Progress events ───────────────────────────────────────────
+    this.load.on("progress", (v) => {
+      const w = Math.round(barW * v);
+      if (this.bar) this.bar.width = w;
+      if (this.loadTxt) this.loadTxt.setText(`Loading... ${Math.round(v*100)}%`);
+    });
+
+    this.load.on("filecomplete-image-logo", () => {
+      if (this.logoImg) {
+        this.logoImg.setTexture("logo");
+        this.logoImg.setDisplaySize(Math.min(W * 0.6, 460), undefined);
+        this.logoImg.displayHeight = this.logoImg.displayWidth * (1024/1536);
+        this.tweens.add({ targets: this.logoImg, alpha: 1, duration: 600, ease: "Quad.easeIn" });
+        this.logoLoaded = true;
+      }
+    });
   }
 
   create() {
-    // Create placeholder textures for any missing assets
-    this._createFallbacks();
-    this.scene.start("MenuScene");
+    // Generate fallback textures for anything that failed to load
+    this._buildFallbacks();
+
+    // Small delay so logo fade-in finishes
+    this.time.delayedCall(400, () => {
+      this.scene.start("MenuScene");
+    });
   }
 
-  _createFallbacks() {
-    // Generate simple colored rectangle textures for any sprite not found
-    const plantColors = {
-      plant_cherrybomb:  0xFF2222, plant_snowpea:    0x64C8E6,
-      plant_chomper:     0xA030C0, plant_repeater:   0x20A028,
-      plant_potatomine:  0xA07828, plant_iceshroom:  0x8CDCFF,
-      plant_squash:      0x3CB43C, plant_tallnut:    0xB07828,
-      plant_threepeater: 0x14C828, plant_puffshroom: 0x507890,
+  _buildFallbacks() {
+    const colors = {
+      plant_cherrybomb:0xFF2222,   plant_snowpea:0x64C8E6,
+      plant_chomper:0xA030C0,      plant_repeater:0x20A028,
+      plant_potatomine:0xA07828,   plant_iceshroom:0x8CDCFF,
+      plant_squash:0x3CB43C,       plant_tallnut:0xB07828,
+      plant_threepeater:0x14C828,  plant_puffshroom:0x507890,
     };
-    Object.entries(plantColors).forEach(([key, color]) => {
-      if (!this.textures.exists(key)) {
-        const g = this.make.graphics({x:0,y:0,add:false});
-        g.fillStyle(color); g.fillRoundedRect(0,0,60,60,8);
-        g.generateTexture(key, 60, 60); g.destroy();
-      }
-    });
+    Object.entries(colors).forEach(([k,c]) => this._fallbackImg(k,c,70,90));
 
-    const zombieColors = {
-      zombie_bucket:0x9090AA, zombie_flag:0xBEC8A8, zombie_newspaper:0xC8C3AF,
-      zombie_football:0x9C7040, zombie_polevault:0xB0B0A0,
-      zombie_gargantuar:0x60563C, zombie_imp:0xB07860,
+    const zc = {
+      zombie_bucket:0x9090AA,      zombie_flag:0xBEC8A8,
+      zombie_newspaper:0xC8C3AF,   zombie_football:0x9C7040,
+      zombie_polevault:0xB0B0A0,   zombie_gargantuar:0x60563C,
+      zombie_imp:0xB07860,
     };
-    Object.entries(zombieColors).forEach(([key, color]) => {
-      if (!this.textures.exists(key)) {
-        const g = this.make.graphics({x:0,y:0,add:false});
-        g.fillStyle(color); g.fillRect(0,0,60,100);
-        g.generateTexture(key, 60, 100); g.destroy();
-      }
+    Object.entries(zc).forEach(([k,c]) => this._fallbackImg(k,c,60,110));
+
+    const px = { proj_pea:0x50C850, proj_snowpea:0x96E8FF, proj_fire:0xFF7814 };
+    Object.entries(px).forEach(([k,c]) => this._fallbackCircle(k,c,9));
+
+    if (!this.textures.exists("ui_sun"))    this._fallbackCircle("ui_sun",0xFFD800,20);
+    if (!this.textures.exists("lawnmower")) this._fallbackImg("lawnmower",0x885522,44,30);
+    if (!this.textures.exists("gravestone"))this._fallbackImg("gravestone",0x909090,60,80);
+    if (!this.textures.exists("ui_seed_bg"))this._fallbackImg("ui_seed_bg",0x2A5A10,64,80);
+
+    const bgFallbacks = { bg_night:0x0A0A2E, bg_pool:0x3C8C8C, bg_fog:0x7C8C96, bg_roof:0xC07832 };
+    Object.entries(bgFallbacks).forEach(([k,c]) => {
+      if (!this.textures.exists(k)) this._fallbackImg(k,c,900,600);
     });
+  }
 
-    // Projectile fallbacks
-    const projColors = { proj_pea:0x50C850, proj_snowpea:0x96E8FF, proj_fire:0xFF7814 };
-    Object.entries(projColors).forEach(([key, color]) => {
-      if (!this.textures.exists(key)) {
-        const g = this.make.graphics({x:0,y:0,add:false});
-        g.fillStyle(color); g.fillCircle(8,8,8);
-        g.generateTexture(key, 16, 16); g.destroy();
-      }
-    });
-
-    // Sun fallback
-    if (!this.textures.exists("fx_sun")) {
-      const g = this.make.graphics({x:0,y:0,add:false});
-      g.fillStyle(0xFFD800); g.fillCircle(20,20,20);
-      g.generateTexture("fx_sun", 40, 40); g.destroy();
-    }
-
-    // Background fallbacks
-    const bgColors = { bg_night:0x0A0A2E, bg_pool:0x3C8C8C, bg_fog:0x7C8C96, bg_roof:0xC07832 };
-    Object.entries(bgColors).forEach(([key, color]) => {
-      if (!this.textures.exists(key)) {
-        const g = this.make.graphics({x:0,y:0,add:false});
-        g.fillStyle(color); g.fillRect(0,0,900,600);
-        g.generateTexture(key, 900, 600); g.destroy();
-      }
-    });
-
-    // House fallback
-    if (!this.textures.exists("house")) {
-      const g = this.make.graphics({x:0,y:0,add:false});
-      g.fillStyle(0xE8D0A0); g.fillRect(0,20,80,120);
-      g.fillStyle(0xC84020); g.fillTriangle(0,20,80,20,40,0);
-      g.generateTexture("house", 80, 140); g.destroy();
-    }
-
-    // Audio fallbacks (silence buffers)
-    const audioKeys = ["music_menu","music_grasswalk","music_moongrains","music_watery_graves",
-                       "music_cerebrawl","sfx_zombie_groan","sfx_pea_hit","sfx_plant",
-                       "sfx_sun_collect","sfx_lawnmower","sfx_explosion","sfx_freeze","sfx_level_complete"];
-    audioKeys.forEach(k => {
-      if (!this.cache.audio.exists(k)) {
-        // Create silent audio via Web Audio API
-        try {
-          const ctx = this.sound.context;
-          if (ctx) {
-            const buf = ctx.createBuffer(1, 44100, 44100);
-            this.cache.audio.add(k, buf);
-          }
-        } catch(_) {}
-      }
-    });
+  _fallbackImg(key, color, w, h) {
+    if (this.textures.exists(key)) return;
+    const g = this.make.graphics({x:0,y:0,add:false});
+    g.fillStyle(color,1); g.fillRoundedRect(0,0,w,h,8);
+    g.generateTexture(key,w,h); g.destroy();
+  }
+  _fallbackCircle(key, color, r) {
+    if (this.textures.exists(key)) return;
+    const g = this.make.graphics({x:0,y:0,add:false});
+    g.fillStyle(color,1); g.fillCircle(r,r,r);
+    g.generateTexture(key,r*2,r*2); g.destroy();
   }
 }
